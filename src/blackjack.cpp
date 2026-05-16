@@ -54,19 +54,19 @@ void DailyBlackjackReward(int chips, int lastDailyCheck) {
 	nextLoginTime = 86400 - timeFromDay;
 
 	if (nextLoginTime / 60 >= 1) {
-		nextLoginTime = nextLoginTime / 60;
+		nextLoginTime /= 60;
 		timeMagnitude = 'm';
 
 		if (nextLoginTime / 60 > 1) {
 			timeRemainder = nextLoginTime % 60;
-			nextLoginTime = nextLoginTime / 60;
+			nextLoginTime /= 60;
 			timeMagnitude = 'h';
 		}
 	}
 
 	if (currentDailyCheck >= lastDailyCheck + 86400) {
 		lastDailyCheck = currentDailyCheck;
-		chips = chips + 1500;
+		chips += 1500;
 		SaveBlackjackFile(chips, lastDailyCheck);
 
 		std::cout << "Thank you for logging in today! Your daily reward of 1500 chips has been depositied.\n";
@@ -86,7 +86,7 @@ void DailyBlackjackReward(int chips, int lastDailyCheck) {
 void CalculatePlayerOrDealerTotal(std::vector<int> playerOrDealerCards, int& playerOrDealerTotal) {
 	playerOrDealerTotal = 0;
 	for (int i : playerOrDealerCards) {
-		playerOrDealerTotal = playerOrDealerTotal + i;
+		playerOrDealerTotal += i;
 	}
 }
 
@@ -152,6 +152,45 @@ void DisplayPlayerOrDealerCards(int playerOrDealerTotal, std::vector<int>& playe
 	}
 }
 
+void DisplayHandResults(std::vector<int>playerCards, std::vector<int>dealerCards, int& cardsDrawn, int& totalBalance, int& bet) {
+	int playerTotal;
+	int dealerTotal;
+
+	CalculatePlayerOrDealerTotal(playerCards, playerTotal);
+	CalculatePlayerOrDealerTotal(dealerCards, dealerTotal);
+
+	if (playerTotal > 21) {
+		std::cout << "\n\nYou bust!";
+	}
+	else if (playerTotal == 21 && dealerTotal != 21) {
+		std::cout << "\n\nBlackjack!";
+		totalBalance += (bet * 2) + (bet * 0.5);
+	}
+	else if (dealerTotal > 21) {
+		std::cout << "\n\nDealer busts!";
+		totalBalance += (bet * 2);
+	}
+	else if (playerTotal == dealerTotal) {
+		std::cout << "\n\nPush!";
+		totalBalance += bet;
+	}
+	else if (playerTotal > dealerTotal) {
+		std::cout << "\n\nYou win!";
+		totalBalance += (bet * 2);
+	}
+	else {
+		std::cout << "\n\nYou lose!";
+	}
+
+	std::cout << "\nYour new balance is $" << totalBalance << ".\n";
+	SaveBlackjackFile(totalBalance, CurrentTime());
+
+	if (cardsDrawn >= 117) {
+		std::cout << "\nYou've hit the cut card, reshuffling shoe.";
+		BlackjackMenu();
+	}
+}
+
 void AceOneOrEleven(std::vector<int>& playerOrDealerCards, int& playerOrDealerTotal) {
 	int x = 0;
 	for (int i : playerOrDealerCards) {
@@ -164,20 +203,35 @@ void AceOneOrEleven(std::vector<int>& playerOrDealerCards, int& playerOrDealerTo
 	}
 }
 
-void hitOrStand(std::vector<int>& playerCards, std::vector<int>& dealerCards, int(&cards)[10], int(&cardsWeighted)[10], int& cardsDrawn, std::discrete_distribution<>& dist, std::mt19937& gen) {
+char hitOrStandCheck() {
+	char hitOrStand;
+
+	while (true) {
+		std::cout << "\n\nHit or Stand (H/S): ";
+		std::cin >> hitOrStand;
+
+		if (std::toupper(hitOrStand) != 'H' && std::toupper(hitOrStand) != 'S') {
+			std::cout << "Invalid move, please enter either H (hit) or S (stand)\n\n";
+			std::cin.clear();
+			std::cin.ignore(1000, '\n');
+		}
+		else {
+			break;
+		}
+	}
+	return std::toupper(hitOrStand);
+}
+
+void hitOrStand(char playerChoice, std::vector<int>& playerCards, std::vector<int>& dealerCards, int(&cards)[10], int(&cardsWeighted)[10], int& cardsDrawn, std::discrete_distribution<>& dist, std::mt19937& gen) {
 	int playerTotal;
 	int dealerTotal;
 
 	CalculatePlayerOrDealerTotal(playerCards, playerTotal);
 	CalculatePlayerOrDealerTotal(dealerCards, dealerTotal);
 
-	while (true) {
-		char hitOrStand;
-		std::cout << "\n\nHit or Stand (H/S): ";
-		std::cin >> hitOrStand;
-		std::cout << "\n";
-
-		if (std::toupper(hitOrStand) == 'H') {
+	switch (std::toupper(playerChoice)) {
+	case 'H':
+		while (true) {
 			BlackjackDrawCard('p', playerCards, dealerCards, cards, cardsWeighted, cardsDrawn, dist, gen);;
 
 			AceOneOrEleven(playerCards, playerTotal);
@@ -190,32 +244,42 @@ void hitOrStand(std::vector<int>& playerCards, std::vector<int>& dealerCards, in
 			if (playerTotal >= 21) {
 				break;
 			}
-		}
-		else if (std::toupper(hitOrStand) == 'S') {
-			while (dealerTotal < 17) {
-				BlackjackDrawCard('d', playerCards, dealerCards, cards, cardsWeighted, cardsDrawn, dist, gen);
-				CalculatePlayerOrDealerTotal(dealerCards, dealerTotal);
 
-				AceOneOrEleven(dealerCards, dealerTotal);
-
-				DisplayPlayerOrDealerCards(playerTotal, playerCards, "Player");
-				DisplayPlayerOrDealerCards(dealerTotal, dealerCards, "Dealer");
-				std::cout << "\n";
-			}
-			break;
+			if (hitOrStandCheck() == 'S') {
+				break;
+			}	
 		}
-		else {
-			std::cout << "Invalid move, please enter either H (hit) or S (stand)\n\n";
+	case 'S':
+		while (dealerTotal < 17) {
+			BlackjackDrawCard('d', playerCards, dealerCards, cards, cardsWeighted, cardsDrawn, dist, gen);
+
+			AceOneOrEleven(dealerCards, dealerTotal);
+
+			DisplayPlayerOrDealerCards(playerTotal, playerCards, "Player");
+			DisplayPlayerOrDealerCards(dealerTotal, dealerCards, "Dealer");
+
+			CalculatePlayerOrDealerTotal(dealerCards, dealerTotal);
+
+			std::cout << "\n";
 		}
 	}
 }
 
-void SplitCards(int splitCard, int(&cards)[10], int(&cardsWeighted)[10], int& cardsDrawn, std::discrete_distribution<>& dist, std::mt19937& gen) {
-	std::vector<int> playerCards = {};
-	std::vector<int> dealerCards = {};
-	
-	std::cout << "working on";
-	BlackjackDrawCard('p', playerCards, dealerCards, cards, cardsWeighted, cardsDrawn, dist, gen);
+void SplitCards(int splitCard, int dealerCard, int(&cards)[10], int(&cardsWeighted)[10], int& cardsDrawn, int& totalBalance, int& bet, std::discrete_distribution<>& dist, std::mt19937& gen) {
+	for (int i = 1; i < 3; i++) {
+		if (i == 2) {
+			totalBalance -= bet;
+		}
+		std::vector<int> playerCards = { splitCard };
+		std::vector<int> dealerCards = { dealerCard };
+
+		std::cout << "\nHand " << i << ".\n";
+		DisplayPlayerOrDealerCards(0, playerCards, "player");
+		DisplayPlayerOrDealerCards(0, dealerCards, "dealer");
+
+		hitOrStand(hitOrStandCheck(), playerCards, dealerCards, cards, cardsWeighted, cardsDrawn, dist, gen);
+		DisplayHandResults(playerCards, dealerCards, cardsDrawn, totalBalance, bet);
+	}
 }
 
 void BlackjackGame(int& bet, int& totalBalance, int& cardsDrawn, int(&cards)[10], int(&cardsWeighted)[10]) {
@@ -261,7 +325,7 @@ void BlackjackGame(int& bet, int& totalBalance, int& cardsDrawn, int(&cards)[10]
 
 			switch (splitChoice) {
 			case 'y':
-				SplitCards(playerCards[0], cards, cardsWeighted, cardsDrawn, dist, gen);
+				SplitCards(playerCards[0], dealerCards[0], cards, cardsWeighted, cardsDrawn, totalBalance, bet, dist, gen);
 				splitErrorCheck = false;
 
 				std::cin.clear();
@@ -281,6 +345,7 @@ void BlackjackGame(int& bet, int& totalBalance, int& cardsDrawn, int(&cards)[10]
 				std::cin.ignore(1000, '\n');
 			} 
 		} while (splitErrorCheck);
+		return;
 	}
 
 	if (playerTotal == 21) {
@@ -294,43 +359,10 @@ void BlackjackGame(int& bet, int& totalBalance, int& cardsDrawn, int(&cards)[10]
 	}
 
 	if (runOnce) {
-		hitOrStand(playerCards, dealerCards, cards, cardsWeighted, cardsDrawn, dist, gen);
-
+		hitOrStand(hitOrStandCheck(), playerCards, dealerCards, cards, cardsWeighted, cardsDrawn, dist, gen);
 	}
 
-	CalculatePlayerOrDealerTotal(playerCards, playerTotal);
-	CalculatePlayerOrDealerTotal(dealerCards, dealerTotal);
-
-	if (playerTotal > 21) {
-		std::cout << "\n\nYou bust!";
-	}
-	else if (playerTotal == 21 && dealerTotal != 21) {
-		std::cout << "\n\nBlackjack!";
-		totalBalance = totalBalance + (bet * 2) + (bet * 0.5);
-	}
-	else if (dealerTotal > 21) {
-		std::cout << "\n\nDealer busts!";
-		totalBalance = totalBalance + (bet * 2);
-	}
-	else if (playerTotal == dealerTotal) {
-		std::cout << "\n\nPush!";
-		totalBalance = totalBalance + bet;
-	}
-	else if (playerTotal > dealerTotal) {
-		std::cout << "\n\nYou win!";
-		totalBalance = totalBalance + (bet * 2);
-	}
-	else {
-		std::cout << "\n\nYou lose!";
-	}
-
-	std::cout << "\nYour new balance is $" << totalBalance << ".\n";
-	SaveBlackjackFile(totalBalance, CurrentTime());
-
-	if (cardsDrawn >= 117) {
-		std::cout << "\nYou've hit the cut card, reshuffling shoe.";
-		BlackjackMenu();
-	}
+	DisplayHandResults(playerCards, dealerCards, cardsDrawn, totalBalance, bet);
 }
 
 
@@ -376,7 +408,7 @@ void BlackjackTable(int table, int& chips, int& cardsDrawn, int(&cards)[10], int
 		}
 		else {
 			std::cin.ignore(1000, '\n');
-			chips = chips - bet;
+			chips -= bet;
 			BlackjackGame(bet, chips, cardsDrawn, cards, cardsWeighted);
 		}
 	}
@@ -405,7 +437,6 @@ void BlackjackMenu() {
 		lastDailyCheck = 0;
 		SaveBlackjackFile(chips, lastDailyCheck);
 		file.close();
-
 	}
 
 	while (true) {
