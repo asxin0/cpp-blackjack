@@ -56,10 +56,10 @@ void DisplayPlayerOrDealerCards(int playerOrDealerTotal, std::vector<int>& playe
 	for (int i : playerOrDealerCards) {
 		if (i == 11) {
 			if (x == playerOrDealerCards.size()) {
-				std::cout << i << " (1 or 11)";
+				std::cout << i << " (Ace)";
 			}
 			else {
-				std::cout << i << " (1 or 11), ";
+				std::cout << i << " (Ace), ";
 			}
 		}
 		else {

@@ -13,7 +13,6 @@
 #include <ctime>
 #include <iomanip>
 
-
 char hitOrStandCheck() {
 	char hitOrStand;
 
@@ -22,7 +21,7 @@ char hitOrStandCheck() {
 		std::cin >> hitOrStand;
 
 		if (std::toupper(hitOrStand) != 'H' && std::toupper(hitOrStand) != 'S') {
-			std::cout << "Invalid move, please enter either H (hit) or S (stand)\n\n";
+			std::cout << "\nInvalid move, please enter either H (hit) or S (stand)";
 			std::cin.clear();
 			std::cin.ignore(1000, '\n');
 		}
@@ -32,7 +31,6 @@ char hitOrStandCheck() {
 	}
 	return std::toupper(hitOrStand);
 }
-
 
 void SplitCards(int splitCard, int dealerCard, int(&cards)[10], int(&cardsWeighted)[10], int& cardsDrawn, int& totalBalance, int& bet, std::discrete_distribution<>& dist, std::mt19937& gen) {
 	for (int i = 1; i < 3; i++) {
@@ -163,7 +161,7 @@ void BlackjackTable(int table, int& chips, int& cardsDrawn, int(&cards)[10], int
 		std::cin >> bet;
 
 		if (bet < 0) {
-			BlackjackMenu();
+			return;
 		}
 		else if (bet < minBets) {
 			std::cout << "Bet does not meet the minimum bet.\n";
@@ -184,31 +182,30 @@ void BlackjackTable(int table, int& chips, int& cardsDrawn, int(&cards)[10], int
 }
 
 void BlackjackMenu() {
-
-	int chips;
-	int lastDailyCheck;
-	int table;
-	BlackjackTableValues blackjack;
-	int requirements[3] = { 1000, 10000, 100000 };
-
-	int cards[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	int cardsWeighted[10] = { 12, 12, 12, 12, 12, 12, 12, 12, 12, 48 };
-	int cardsDrawn = 0;
-
-	std::ifstream file("Blackjack.txt");
-	if (file.is_open()) {
-		LoadBlackjackFile(chips, lastDailyCheck);
-		file.close();
-	}
-	else {
-		std::ofstream file("Blackjack.txt");
-		chips = 0;
-		lastDailyCheck = 0;
-		SaveBlackjackFile(chips, lastDailyCheck);
-		file.close();
-	}
-
 	while (true) {
+
+		int chips;
+		int lastDailyCheck;
+		int table;
+		BlackjackTableValues blackjack;
+		int requirements[3] = { 1000, 10000, 100000 };
+
+		int cards[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		int cardsWeighted[10] = { 12, 12, 12, 12, 12, 12, 12, 12, 12, 48 };
+		int cardsDrawn = 0;
+
+		std::ifstream file("Blackjack.txt");
+		if (file.is_open()) {
+			LoadBlackjackFile(chips, lastDailyCheck);
+			file.close();
+		}
+		else {
+			std::ofstream file("Blackjack.txt");
+			chips = 0;
+			lastDailyCheck = 0;
+			SaveBlackjackFile(chips, lastDailyCheck);
+			file.close();
+		}
 
 		std::cout << "\n\nWelcome to Blackjack - 3 deck shoe\n\n";
 		DailyBlackjackReward(chips, lastDailyCheck);
