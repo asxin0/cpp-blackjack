@@ -16,44 +16,47 @@ void BlackjackDrawCard(Hand& hand, Shoe& shoe) {
 	shoe.dist = std::discrete_distribution<>(shoe.cardsWeighted, shoe.cardsWeighted + 10);
 }
 
-void hitOrStand(char playerChoice, Hand& player, Hand& dealer, Shoe& shoe) {
+void playerHit(Hand& player, Hand& dealer, Shoe& shoe) {
+	CalculatePlayerOrDealerTotal(player);
+	CalculatePlayerOrDealerTotal(dealer);
+	
+	while (true) {
+		BlackjackDrawCard(player, shoe);;
 
+		AceOneOrEleven(player);
+
+		DisplayPlayerOrDealerCards(player, "Player");
+		DisplayPlayerOrDealerCards(dealer, "Dealer");
+
+		CalculatePlayerOrDealerTotal(player);
+
+		if (player.total >= 21) {
+			break;
+		}
+
+		char playerNextChoice = hitOrStandCheck();
+
+		if (playerNextChoice == 'S') {
+			break;
+		}
+	}
+}
+
+void playerStand(Hand& player, Hand& dealer, Shoe& shoe) {
 	CalculatePlayerOrDealerTotal(player);
 	CalculatePlayerOrDealerTotal(dealer);
 
-	switch (std::toupper(playerChoice)) {
-	case 'H':
-		while (true) {
-			BlackjackDrawCard(player, shoe);;
+	while (dealer.total < 17) {
+		BlackjackDrawCard(dealer, shoe);
 
-			AceOneOrEleven(player);
+		AceOneOrEleven(dealer);
 
-			DisplayPlayerOrDealerCards(player, "Player");
-			DisplayPlayerOrDealerCards(dealer, "Dealer");
+		DisplayPlayerOrDealerCards(player, "Player");
+		DisplayPlayerOrDealerCards(dealer, "Dealer");
 
-			CalculatePlayerOrDealerTotal(player);
+		CalculatePlayerOrDealerTotal(dealer);
 
-			if (player.total >= 21) {
-				break;
-			}
-
-			if (hitOrStandCheck() == 'S') {
-				break;
-			}
-		}
-	case 'S':
-		while (dealer.total < 17) {
-			BlackjackDrawCard(dealer, shoe);
-
-			AceOneOrEleven(dealer);
-
-			DisplayPlayerOrDealerCards(player, "Player");
-			DisplayPlayerOrDealerCards(dealer, "Dealer");
-
-			CalculatePlayerOrDealerTotal(dealer);
-
-			std::cout << "\n";
-		}
+		std::cout << "\n";
 	}
 }
 

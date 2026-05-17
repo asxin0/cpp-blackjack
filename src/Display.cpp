@@ -33,7 +33,9 @@ void DisplayHandResults(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalanc
 	else {
 		std::cout << "\n\nYou lose!";
 	}
+}
 
+void DisplayBalanceResults(Shoe& shoe, int& totalBalance, int& bet) {
 	std::cout << "\nYour new balance is $" << totalBalance << ".\n";
 	SaveBlackjackFile(totalBalance, CurrentTime());
 

@@ -34,6 +34,7 @@ char hitOrStandCheck() {
 
 void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& dealer, int& totalBalance, int& bet) {
 	dealer.cards = { dealerCard };
+	std::vector<Hand> playerHands = {};
 
 	for (int i = 1; i < 3; i++) {
 		if (i == 2) {
@@ -42,11 +43,31 @@ void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& d
 		player.cards = { splitCard };
 
 		std::cout << "\nHand " << i << ".\n";
+		BlackjackDrawCard(player, shoe);
+
 		DisplayPlayerOrDealerCards(player, "player");
 		DisplayPlayerOrDealerCards(dealer, "dealer");
 
-		hitOrStand(hitOrStandCheck(), player, dealer, shoe);
+		if (hitOrStandCheck() == 'H') {
+			playerHit(player, dealer, shoe);
+		}
+
+		CalculatePlayerOrDealerTotal(player);
+		playerHands.push_back(player);
+	}
+	
+	std::cout << "\nDealer Draws:\n";
+	playerStand(player, dealer, shoe);
+
+	std::cout << "\n";
+
+	for (int i = 0; i < 2; i++) {
+		player = playerHands[i];
+
+		std::cout << "\nHand " << i + 1 << " (Your Total: " << player.total << ")";
+
 		DisplayHandResults(player, dealer, shoe, totalBalance, bet);
+		DisplayBalanceResults(shoe, totalBalance, bet);
 	}
 }
 
@@ -87,12 +108,18 @@ void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe) {
 
 			switch (splitChoice) {
 			case 'y':
+				if (totalBalance < bet * 2) {
+					std::cout << "You don't have enough chips to split.";
+					splitErrorCheck = false;
+					break;
+				}
+
 				SplitCards(player.cards[0], dealer.cards[0], shoe, player, dealer, totalBalance, bet);
 				splitErrorCheck = false;
 
 				std::cin.clear();
 				std::cin.ignore(1000, '\n');
-				break;
+				return;
 			case 'n':
 				DisplayPlayerOrDealerCards(player, "Player");
 				DisplayPlayerOrDealerCards(dealer, "Dealer");
@@ -107,7 +134,6 @@ void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe) {
 				std::cin.ignore(1000, '\n');
 			} 
 		} while (splitErrorCheck);
-		return;
 	}
 
 	if (player.total == 21) {
@@ -121,10 +147,17 @@ void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe) {
 	}
 
 	if (runOnce) {
-		hitOrStand(hitOrStandCheck(), player, dealer, shoe);
+		if (hitOrStandCheck() == 'H') {
+			playerHit(player, dealer, shoe);
+		}
+
+		if (player.total <= 21) {
+			playerStand(player, dealer, shoe);
+		}
 	}
 
 	DisplayHandResults(player, dealer, shoe, totalBalance, bet);
+	DisplayBalanceResults(shoe, totalBalance, bet);
 }
 
 void BlackjackTable(int table, int& chips, Shoe& shoe) {
