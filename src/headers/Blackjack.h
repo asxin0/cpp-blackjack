@@ -1,6 +1,6 @@
 #pragma once
 
-#include "headers/Cards.h"
+#include "Cards.h"
 #include <random>
 
 struct BlackjackTableValues {

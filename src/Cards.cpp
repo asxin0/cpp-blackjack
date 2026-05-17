@@ -4,30 +4,16 @@
 
 #include <iostream>
 
-void BlackjackDrawCard(char playerOrDealer, Hand& hand, Shoe& shoe) {
+void BlackjackDrawCard(Hand& hand, Shoe& shoe) {
+	int card = shoe.dist(shoe.gen);
+	int result = shoe.cards[card];
 
-	if (playerOrDealer == 'd') {
-		int card = shoe.dist(shoe.gen);
-		int result = shoe.cards[card];
+	BlackjackAceCheck(result, hand);
 
-		BlackjackAceCheck(result, hand);
+	shoe.cardsWeighted[card]--;
+	shoe.cardsDrawn++;
 
-		shoe.cardsWeighted[card]--;
-		shoe.cardsDrawn++;
-
-		shoe.dist = std::discrete_distribution<>(shoe.cardsWeighted, shoe.cardsWeighted + 10);
-	}
-	else {
-		int card = shoe.dist(shoe.gen);
-		int result = shoe.cards[card];
-
-		BlackjackAceCheck(result, hand);
-
-		shoe.cardsWeighted[card]--;
-		shoe.cardsDrawn++;
-
-		shoe.dist = std::discrete_distribution<>(shoe.cardsWeighted, shoe.cardsWeighted + 10);
-	}
+	shoe.dist = std::discrete_distribution<>(shoe.cardsWeighted, shoe.cardsWeighted + 10);
 }
 
 void hitOrStand(char playerChoice, Hand& player, Hand& dealer, Shoe& shoe) {
@@ -38,7 +24,7 @@ void hitOrStand(char playerChoice, Hand& player, Hand& dealer, Shoe& shoe) {
 	switch (std::toupper(playerChoice)) {
 	case 'H':
 		while (true) {
-			BlackjackDrawCard('p', player, shoe);;
+			BlackjackDrawCard(player, shoe);;
 
 			AceOneOrEleven(player);
 
@@ -57,7 +43,7 @@ void hitOrStand(char playerChoice, Hand& player, Hand& dealer, Shoe& shoe) {
 		}
 	case 'S':
 		while (dealer.total < 17) {
-			BlackjackDrawCard('d', dealer, shoe);
+			BlackjackDrawCard(dealer, shoe);
 
 			AceOneOrEleven(dealer);
 

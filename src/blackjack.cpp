@@ -33,13 +33,13 @@ char hitOrStandCheck() {
 }
 
 void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& dealer, int& totalBalance, int& bet) {
-	std::vector<int> dealerCards = { dealerCard };
+	dealer.cards = { dealerCard };
 
 	for (int i = 1; i < 3; i++) {
 		if (i == 2) {
 			totalBalance -= bet;
 		}
-		std::vector<int> playerCards = { splitCard };
+		player.cards = { splitCard };
 
 		std::cout << "\nHand " << i << ".\n";
 		DisplayPlayerOrDealerCards(player, "player");
@@ -61,10 +61,10 @@ void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe) {
 
 	while (i <= 3) {
 		if (i == 2) {
-			BlackjackDrawCard('d', dealer, shoe);
+			BlackjackDrawCard(dealer, shoe);
 		}
 		else if (i == 1 || i == 3) {
-			BlackjackDrawCard('p', player, shoe);
+			BlackjackDrawCard(player, shoe);
 		}
 		else {
 		}

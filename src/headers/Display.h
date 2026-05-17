@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Cards.h"
+
 #include <vector>
 #include <string>
 

@@ -21,7 +21,7 @@ struct Hand {
 	int total = 0;
 };
 
-void BlackjackDrawCard(char playerOrDealer, Hand& hand, Shoe& shoe);
+void BlackjackDrawCard(Hand& hand, Shoe& shoe);
 void hitOrStand(char playerChoice, Hand& hand, Hand& dealer, Shoe& shoe);
 void AceOneOrEleven(Hand& hand);
 void CalculatePlayerOrDealerTotal(Hand& hand);
