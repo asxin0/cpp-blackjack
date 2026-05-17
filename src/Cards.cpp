@@ -4,51 +4,50 @@
 
 #include <iostream>
 
-void BlackjackDrawCard(char playerOrDealer, std::vector<int>& playerCards, std::vector<int>& dealerCards, int(&cards)[10], int(&cardsWeighted)[10], int& cardsDrawn, std::discrete_distribution<>& dist, std::mt19937& gen) {
+void BlackjackDrawCard(char playerOrDealer, Hand& hand, Shoe& shoe) {
+
 	if (playerOrDealer == 'd') {
-		int card = dist(gen);
-		int result = cards[card];
+		int card = shoe.dist(shoe.gen);
+		int result = shoe.cards[card];
 
-		BlackjackAceCheck(result, dealerCards);
+		BlackjackAceCheck(result, hand);
 
-		cardsWeighted[card]--;
-		cardsDrawn++;
+		shoe.cardsWeighted[card]--;
+		shoe.cardsDrawn++;
 
-		dist = std::discrete_distribution<>(cardsWeighted, cardsWeighted + 10);
+		shoe.dist = std::discrete_distribution<>(shoe.cardsWeighted, shoe.cardsWeighted + 10);
 	}
 	else {
-		int card = dist(gen);
-		int result = cards[card];
+		int card = shoe.dist(shoe.gen);
+		int result = shoe.cards[card];
 
-		BlackjackAceCheck(result, playerCards);
+		BlackjackAceCheck(result, hand);
 
-		cardsWeighted[card]--;
-		cardsDrawn++;
+		shoe.cardsWeighted[card]--;
+		shoe.cardsDrawn++;
 
-		dist = std::discrete_distribution<>(cardsWeighted, cardsWeighted + 10);
+		shoe.dist = std::discrete_distribution<>(shoe.cardsWeighted, shoe.cardsWeighted + 10);
 	}
 }
 
-void hitOrStand(char playerChoice, std::vector<int>& playerCards, std::vector<int>& dealerCards, int(&cards)[10], int(&cardsWeighted)[10], int& cardsDrawn, std::discrete_distribution<>& dist, std::mt19937& gen) {
-	int playerTotal;
-	int dealerTotal;
+void hitOrStand(char playerChoice, Hand& player, Hand& dealer, Shoe& shoe) {
 
-	CalculatePlayerOrDealerTotal(playerCards, playerTotal);
-	CalculatePlayerOrDealerTotal(dealerCards, dealerTotal);
+	CalculatePlayerOrDealerTotal(player);
+	CalculatePlayerOrDealerTotal(dealer);
 
 	switch (std::toupper(playerChoice)) {
 	case 'H':
 		while (true) {
-			BlackjackDrawCard('p', playerCards, dealerCards, cards, cardsWeighted, cardsDrawn, dist, gen);;
+			BlackjackDrawCard('p', player, shoe);;
 
-			AceOneOrEleven(playerCards, playerTotal);
+			AceOneOrEleven(player);
 
-			DisplayPlayerOrDealerCards(playerTotal, playerCards, "Player");
-			DisplayPlayerOrDealerCards(dealerTotal, dealerCards, "Dealer");
+			DisplayPlayerOrDealerCards(player, "Player");
+			DisplayPlayerOrDealerCards(dealer, "Dealer");
 
-			CalculatePlayerOrDealerTotal(playerCards, playerTotal);
+			CalculatePlayerOrDealerTotal(player);
 
-			if (playerTotal >= 21) {
+			if (player.total >= 21) {
 				break;
 			}
 
@@ -57,45 +56,46 @@ void hitOrStand(char playerChoice, std::vector<int>& playerCards, std::vector<in
 			}
 		}
 	case 'S':
-		while (dealerTotal < 17) {
-			BlackjackDrawCard('d', playerCards, dealerCards, cards, cardsWeighted, cardsDrawn, dist, gen);
+		while (dealer.total < 17) {
+			BlackjackDrawCard('d', dealer, shoe);
 
-			AceOneOrEleven(dealerCards, dealerTotal);
+			AceOneOrEleven(dealer);
 
-			DisplayPlayerOrDealerCards(playerTotal, playerCards, "Player");
-			DisplayPlayerOrDealerCards(dealerTotal, dealerCards, "Dealer");
+			DisplayPlayerOrDealerCards(player, "Player");
+			DisplayPlayerOrDealerCards(dealer, "Dealer");
 
-			CalculatePlayerOrDealerTotal(dealerCards, dealerTotal);
+			CalculatePlayerOrDealerTotal(dealer);
 
 			std::cout << "\n";
 		}
 	}
 }
 
-void AceOneOrEleven(std::vector<int>& playerOrDealerCards, int& playerOrDealerTotal) {
-	int x = 0;
-	for (int i : playerOrDealerCards) {
-		CalculatePlayerOrDealerTotal(playerOrDealerCards, playerOrDealerTotal);
+void AceOneOrEleven(Hand& hand) {
 
-		if (i == 11 && playerOrDealerTotal > 21) {
-			playerOrDealerCards[x] = 1;
+	int x = 0;
+	for (int i : hand.cards) {
+		CalculatePlayerOrDealerTotal(hand);
+
+		if (i == 11 && hand.total > 21) {
+			hand.cards[x] = 1;
 		}
 		x++;
 	}
 }
 
-void CalculatePlayerOrDealerTotal(std::vector<int> playerOrDealerCards, int& playerOrDealerTotal) {
-	playerOrDealerTotal = 0;
-	for (int i : playerOrDealerCards) {
-		playerOrDealerTotal += i;
+void CalculatePlayerOrDealerTotal(Hand& hand) {
+	hand.total = 0;
+	for (int i : hand.cards) {
+		hand.total += i;
 	}
 }
 
-void BlackjackAceCheck(int result, std::vector<int>& dealerOrPlayerCards) {
+void BlackjackAceCheck(int result, Hand& hand) {
 	if (result != 1) {
-		dealerOrPlayerCards.push_back(result);
+		hand.cards.push_back(result);
 	}
 	else {
-		dealerOrPlayerCards.push_back(11);
+		hand.cards.push_back(11);
 	}
 }

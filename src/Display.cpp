@@ -7,29 +7,26 @@
 #include <vector>
 #include <iomanip>
 
-void DisplayHandResults(std::vector<int>playerCards, std::vector<int>dealerCards, int& cardsDrawn, int& totalBalance, int& bet) {
-	int playerTotal;
-	int dealerTotal;
+void DisplayHandResults(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance, int& bet) {
+	CalculatePlayerOrDealerTotal(player);
+	CalculatePlayerOrDealerTotal(dealer);
 
-	CalculatePlayerOrDealerTotal(playerCards, playerTotal);
-	CalculatePlayerOrDealerTotal(dealerCards, dealerTotal);
-
-	if (playerTotal > 21) {
+	if (player.total > 21) {
 		std::cout << "\n\nYou bust!";
 	}
-	else if (playerTotal == 21 && dealerTotal != 21) {
+	else if (player.total == 21 && dealer.total != 21) {
 		std::cout << "\n\nBlackjack!";
 		totalBalance += (bet * 2) + (bet * 0.5);
 	}
-	else if (dealerTotal > 21) {
+	else if (dealer.total > 21) {
 		std::cout << "\n\nDealer busts!";
 		totalBalance += (bet * 2);
 	}
-	else if (playerTotal == dealerTotal) {
+	else if (player.total == dealer.total) {
 		std::cout << "\n\nPush!";
 		totalBalance += bet;
 	}
-	else if (playerTotal > dealerTotal) {
+	else if (player.total > dealer.total) {
 		std::cout << "\n\nYou win!";
 		totalBalance += (bet * 2);
 	}
@@ -40,22 +37,22 @@ void DisplayHandResults(std::vector<int>playerCards, std::vector<int>dealerCards
 	std::cout << "\nYour new balance is $" << totalBalance << ".\n";
 	SaveBlackjackFile(totalBalance, CurrentTime());
 
-	if (cardsDrawn >= 117) {
+	if (shoe.cardsDrawn >= 117) {
 		std::cout << "\nYou've hit the cut card, reshuffling shoe.";
 		BlackjackMenu();
 	}
 }
 
-void DisplayPlayerOrDealerCards(int playerOrDealerTotal, std::vector<int>& playerOrDealerCards, std::string name) {
-	CalculatePlayerOrDealerTotal(playerOrDealerCards, playerOrDealerTotal);
+void DisplayPlayerOrDealerCards(Hand& hand, std::string name) {
+	CalculatePlayerOrDealerTotal(hand);
 
-	std::cout << "\n| Total: " << std::setw(2) << playerOrDealerTotal << " | ";
+	std::cout << "\n| Total: " << std::setw(2) << hand.total << " | ";
 	std::cout << name << " cards: ";
 	int x = 1;
 
-	for (int i : playerOrDealerCards) {
+	for (int i : hand.cards) {
 		if (i == 11) {
-			if (x == playerOrDealerCards.size()) {
+			if (x == hand.cards.size()) {
 				std::cout << i << " (Ace)";
 			}
 			else {
@@ -63,7 +60,7 @@ void DisplayPlayerOrDealerCards(int playerOrDealerTotal, std::vector<int>& playe
 			}
 		}
 		else {
-			if (x == playerOrDealerCards.size()) {
+			if (x == hand.cards.size()) {
 				std::cout << i;
 			}
 			else {

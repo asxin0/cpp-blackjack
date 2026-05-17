@@ -1,5 +1,6 @@
 #pragma once
 
+#include "headers/Cards.h"
 #include <random>
 
 struct BlackjackTableValues {
@@ -10,7 +11,7 @@ struct BlackjackTableValues {
 };
 
 char hitOrStandCheck();
-void SplitCards(int splitCard, int dealerCard, int(&cards)[10], int(&cardsWeighted)[10], int& cardsDrawn, int& totalBalance, int& bet, std::discrete_distribution<>& dist, std::mt19937& gen);
-void BlackjackGame(int& bet, int& totalBalance, int& cardsDrawn, int(&cards)[10], int(&cardsWeighted)[10]);
-void BlackjackTable(int table, int& chips, int& cardsDrawn, int(&cards)[10], int(&cardsWeighted)[10]);
+void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& dealer, int& totalBalance, int& bet);
+void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe);
+void BlackjackTable(int table, int& chips, Shoe& shoe);
 void BlackjackMenu();
