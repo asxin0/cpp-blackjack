@@ -5,7 +5,7 @@
 
 struct Shoe {
 	int cards[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	int cardsWeighted[10] = { 12, 12, 12, 500000, 12, 12, 12, 12, 12, 48 };
+	int cardsWeighted[10] = { 12, 12, 12, 12, 1200000, 12, 12, 12, 12, 48 };
 
 	int cardsDrawn = 0;
 
@@ -19,11 +19,13 @@ struct Hand {
 	std::vector<int> cards = {};
 
 	int total = 0;
+	bool isDoubled = false;
 };
 
 void BlackjackDrawCard(Hand& hand, Shoe& shoe);
 void playerHit(Hand& hand, Hand& dealer, Shoe& shoe);
 void playerStand(Hand& hand, Hand& dealer, Shoe& shoe);
+void playerDouble(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance, int& bet);
 void AceOneOrEleven(Hand& hand);
 void CalculatePlayerOrDealerTotal(Hand& hand);
 void BlackjackAceCheck(int result, Hand& hand);

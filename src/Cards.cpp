@@ -34,7 +34,7 @@ void playerHit(Hand& player, Hand& dealer, Shoe& shoe) {
 			break;
 		}
 
-		char playerNextChoice = hitOrStandCheck();
+		char playerNextChoice = playerMoveCheck();
 
 		if (playerNextChoice == 'S') {
 			break;
@@ -58,6 +58,18 @@ void playerStand(Hand& player, Hand& dealer, Shoe& shoe) {
 
 		std::cout << "\n";
 	}
+}
+
+void playerDouble(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance, int& bet) {
+	CalculatePlayerOrDealerTotal(player);
+	CalculatePlayerOrDealerTotal(dealer);
+
+	BlackjackDrawCard(player, shoe);
+	totalBalance -= bet;
+	bet *= 2;
+
+	DisplayPlayerOrDealerCards(player, "Player");
+	DisplayPlayerOrDealerCards(dealer, "Dealer");
 }
 
 void AceOneOrEleven(Hand& hand) {

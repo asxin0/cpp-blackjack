@@ -10,7 +10,7 @@ struct BlackjackTableValues {
 	int maxTables = 3;
 };
 
-char hitOrStandCheck();
+char playerMoveCheck();
 void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& dealer, int& totalBalance, int& bet);
 void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe);
 void BlackjackTable(int table, int& chips, Shoe& shoe);

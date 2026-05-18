@@ -13,15 +13,15 @@
 #include <ctime>
 #include <iomanip>
 
-char hitOrStandCheck() {
-	char hitOrStand;
+char playerMoveCheck() {
+	char playerMove;
 
 	while (true) {
-		std::cout << "\n\nHit or Stand (H/S): ";
-		std::cin >> hitOrStand;
+		std::cout << "\n\nHit - Stand - Double (H / S / D): ";
+		std::cin >> playerMove;
 
-		if (std::toupper(hitOrStand) != 'H' && std::toupper(hitOrStand) != 'S') {
-			std::cout << "\nInvalid move, please enter either H (hit) or S (stand)";
+		if (std::toupper(playerMove) != 'H' && std::toupper(playerMove) != 'S' && std::toupper(playerMove) != 'D') {
+			std::cout << "\nInvalid move, please enter either H (hit), S (stand) or D (double)";
 			std::cin.clear();
 			std::cin.ignore(1000, '\n');
 		}
@@ -29,7 +29,7 @@ char hitOrStandCheck() {
 			break;
 		}
 	}
-	return std::toupper(hitOrStand);
+	return std::toupper(playerMove);
 }
 
 void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& dealer, int& totalBalance, int& bet) {
@@ -41,6 +41,7 @@ void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& d
 			totalBalance -= bet;
 		}
 		player.cards = { splitCard };
+		player.isDoubled = false;
 
 		std::cout << "\nHand " << i << ".\n";
 		BlackjackDrawCard(player, shoe);
@@ -48,8 +49,16 @@ void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& d
 		DisplayPlayerOrDealerCards(player, "player");
 		DisplayPlayerOrDealerCards(dealer, "dealer");
 
-		if (hitOrStandCheck() == 'H') {
+		char playerMove = playerMoveCheck();
+
+		if (playerMove == 'H') {
 			playerHit(player, dealer, shoe);
+		}
+		else if (playerMove == 'D') {
+			playerDouble(player, dealer, shoe, totalBalance, bet);
+			player.isDoubled = true;
+
+			std::cout << "\n";
 		}
 
 		CalculatePlayerOrDealerTotal(player);
@@ -66,8 +75,16 @@ void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& d
 
 		std::cout << "\nHand " << i + 1 << " (Your Total: " << player.total << ")";
 
+		if (player.isDoubled == true) {
+			bet *= 2;
+		}
+
 		DisplayHandResults(player, dealer, shoe, totalBalance, bet);
 		DisplayBalanceResults(shoe, totalBalance, bet);
+
+		if (player.isDoubled == true) {
+			bet /= 2;
+		}
 	}
 }
 
@@ -108,7 +125,7 @@ void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe) {
 
 			switch (splitChoice) {
 			case 'y':
-				if (totalBalance < bet * 2) {
+				if (totalBalance < bet) {
 					std::cout << "You don't have enough chips to split.";
 					splitErrorCheck = false;
 					break;
@@ -146,12 +163,20 @@ void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe) {
 		runOnce = false;
 	}
 
+	char playerMove = playerMoveCheck();
+
 	if (runOnce) {
-		if (hitOrStandCheck() == 'H') {
+		if (playerMove == 'H') {
 			playerHit(player, dealer, shoe);
+		}
+		else if (playerMove == 'D' && totalBalance >= bet) {
+			std::cout << "\n- " << bet << " chips.\n\n";
+			playerDouble(player, dealer, shoe, totalBalance, bet);
+			AceOneOrEleven(player);
 		}
 
 		if (player.total <= 21) {
+			std::cout << "\nDealer Draws...\n";
 			playerStand(player, dealer, shoe);
 		}
 	}
