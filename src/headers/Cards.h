@@ -5,7 +5,7 @@
 
 struct Shoe {
 	int cards[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	int cardsWeighted[10] = { 12, 12, 1200, 12, 12, 12, 12, 12, 12, 48};
+	int cardsWeighted[10] = { 12, 12, 12, 12, 12, 12, 12, 12, 12, 48};
 
 	int cardsDrawn = 0;
 

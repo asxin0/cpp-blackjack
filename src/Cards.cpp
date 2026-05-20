@@ -112,7 +112,6 @@ void playerDouble(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance) {
 }
 
 void AceOneOrEleven(Hand& hand) {
-
 	int x = 0;
 	for (int i : hand.cards) {
 		CalculatePlayerOrDealerTotal(hand);

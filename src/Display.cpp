@@ -17,7 +17,7 @@ void DisplayHandResults(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalanc
 	}
 	else if (player.total == 21 && dealer.total != 21 && player.cards.size() == 2) {
 		std::cout << "\n\nBlackjack!";
-		totalBalance += (player.bet * 2) + (player.bet * 0.5);
+		totalBalance += player.bet * 5 / 2;
 	}
 	else if (dealer.total > 21) {
 		std::cout << "\n\nDealer busts!";

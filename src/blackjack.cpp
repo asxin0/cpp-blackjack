@@ -16,7 +16,7 @@
 #include <thread>
 
 bool cutCardCheck(Shoe& shoe) {
-	if (shoe.cardsDrawn >= 10) {
+	if (shoe.cardsDrawn >= 117) {
 		std::cout << "\n\nYou've hit the cut card, reshuffling shoe.";
 
 		std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -168,10 +168,11 @@ void BlackjackGame(int& totalBalance, Shoe& shoe, Hand& player, Hand& dealer) {
 	}
 
 	AceOneOrEleven(player);
+	CalculatePlayerOrDealerTotal(player);
 
 	if (player.total >= 21) {
 		runOnce = false;
-	}
+	}      
 
 	if (runOnce) {
 		char playerMove = playerMoveCheck(player, totalBalance);
@@ -243,6 +244,7 @@ void BlackjackTable(int table, int& chips, Shoe& shoe) {
 			std::cin.ignore(1000, '\n');
 		}
 		else {
+			std::cin.clear();
 			std::cin.ignore(1000, '\n');
 			chips -= player.bet;
 			BlackjackGame(chips, shoe, player, dealer);
@@ -255,7 +257,7 @@ void BlackjackMenu() {
 
 		int chips;
 		int lastDailyCheck;
-		int table;
+		int table = 0;
 		BlackjackTableValues blackjack;
 		int requirements[3] = { 1000, 10000, 100000 };
 

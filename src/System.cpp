@@ -58,7 +58,7 @@ void DailyBlackjackReward(int chips, int lastDailyCheck) {
 		chips += 1500;
 		SaveBlackjackFile(chips, lastDailyCheck);
 
-		std::cout << "Thank you for logging in today! Your daily reward of 1500 chips has been depositied.\n";
+		std::cout << "Thank you for logging in today! \nYour daily reward of 1500 chips is depositied.\n";
 	}
 	switch (timeMagnitude) {
 	case 'h':
