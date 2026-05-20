@@ -13,7 +13,7 @@
 #include <ctime>
 #include <iomanip>
 
-char playerMoveCheck() {
+char playerMoveCheck(Hand& player, int& totalBalance) {
 	char playerMove;
 
 	while (true) {
@@ -22,26 +22,33 @@ char playerMoveCheck() {
 
 		if (std::toupper(playerMove) != 'H' && std::toupper(playerMove) != 'S' && std::toupper(playerMove) != 'D') {
 			std::cout << "\nInvalid move, please enter either H (hit), S (stand) or D (double)";
+
 			std::cin.clear();
 			std::cin.ignore(1000, '\n');
 		}
 		else {
+			if (std::toupper(playerMove) == 'D' && totalBalance < player.bet) {
+				std::cout << "Not enough chips to double.";
+
+				std::cin.clear();
+				std::cin.ignore(1000, '\n');
+			}
 			break;
 		}
 	}
 	return std::toupper(playerMove);
 }
 
-void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& dealer, int& totalBalance, int& bet) {
+void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& dealer, int& totalBalance) {
 	dealer.cards = { dealerCard };
 	std::vector<Hand> playerHands = {};
+	int baseBet = player.bet;
 
 	for (int i = 1; i < 3; i++) {
-		if (i == 2) {
-			totalBalance -= bet;
-		}
 		player.cards = { splitCard };
 		player.isDoubled = false;
+
+		player.bet = baseBet;
 
 		std::cout << "\nHand " << i << ".\n";
 		BlackjackDrawCard(player, shoe);
@@ -49,22 +56,25 @@ void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& d
 		DisplayPlayerOrDealerCards(player, "player");
 		DisplayPlayerOrDealerCards(dealer, "dealer");
 
-		char playerMove = playerMoveCheck();
+		char playerMove = playerMoveCheck(player, totalBalance);
 
 		if (playerMove == 'H') {
-			playerHit(player, dealer, shoe);
+			playerHit(player, dealer, shoe, totalBalance);
 		}
 		else if (playerMove == 'D') {
-			playerDouble(player, dealer, shoe, totalBalance, bet);
+			playerDouble(player, dealer, shoe, totalBalance);
 			player.isDoubled = true;
 
+			totalBalance -= player.bet;
+			player.bet *= 2;
+
 			std::cout << "\n";
-		}
+		} 
 
 		CalculatePlayerOrDealerTotal(player);
 		playerHands.push_back(player);
 	}
-	
+
 	std::cout << "\nDealer Draws:\n";
 	playerStand(player, dealer, shoe);
 
@@ -75,24 +85,12 @@ void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& d
 
 		std::cout << "\nHand " << i + 1 << " (Your Total: " << player.total << ")";
 
-		if (player.isDoubled == true) {
-			bet *= 2;
-		}
-
-		DisplayHandResults(player, dealer, shoe, totalBalance, bet);
-		DisplayBalanceResults(shoe, totalBalance, bet);
-
-		if (player.isDoubled == true) {
-			bet /= 2;
-		}
+		DisplayHandResults(player, dealer, shoe, totalBalance);
+		DisplayBalanceResults(shoe, player, totalBalance);
 	}
 }
 
-void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe) {
-
-	Hand player;
-	Hand dealer;
-
+void BlackjackGame(int& totalBalance, Shoe& shoe, Hand& player, Hand& dealer) {
 	bool runOnce = true;
 
 	int i = 1;
@@ -125,21 +123,25 @@ void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe) {
 
 			switch (splitChoice) {
 			case 'y':
-				if (totalBalance < bet) {
+				if (totalBalance < player.bet) {
 					std::cout << "You don't have enough chips to split.";
 					splitErrorCheck = false;
+
 					break;
 				}
 
-				SplitCards(player.cards[0], dealer.cards[0], shoe, player, dealer, totalBalance, bet);
+				totalBalance -= player.bet;
+				SplitCards(player.cards[0], dealer.cards[0], shoe, player, dealer, totalBalance);
 				splitErrorCheck = false;
 
 				std::cin.clear();
 				std::cin.ignore(1000, '\n');
+
 				return;
 			case 'n':
 				DisplayPlayerOrDealerCards(player, "Player");
 				DisplayPlayerOrDealerCards(dealer, "Dealer");
+
 				splitErrorCheck = false;
 
 				std::cin.clear();
@@ -147,6 +149,7 @@ void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe) {
 				break;
 			default:
 				std::cout << "\nInvalid Option, (y or n).";
+
 				std::cin.clear();
 				std::cin.ignore(1000, '\n');
 			} 
@@ -163,16 +166,19 @@ void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe) {
 		runOnce = false;
 	}
 
-	char playerMove = playerMoveCheck();
+	char playerMove = playerMoveCheck(player, totalBalance);
 
 	if (runOnce) {
 		if (playerMove == 'H') {
-			playerHit(player, dealer, shoe);
+			playerHit(player, dealer, shoe, totalBalance);
 		}
-		else if (playerMove == 'D' && totalBalance >= bet) {
-			std::cout << "\n- " << bet << " chips.\n\n";
-			playerDouble(player, dealer, shoe, totalBalance, bet);
+		else if (playerMove == 'D' && totalBalance >= player.bet) {
+			std::cout << "\n- " << player.bet << " chips.\n\n";
+			playerDouble(player, dealer, shoe, totalBalance);
 			AceOneOrEleven(player);
+
+			totalBalance -= player.bet;
+			player.bet *= 2;
 		}
 
 		if (player.total <= 21) {
@@ -181,14 +187,16 @@ void BlackjackGame(int& bet, int& totalBalance, Shoe& shoe) {
 		}
 	}
 
-	DisplayHandResults(player, dealer, shoe, totalBalance, bet);
-	DisplayBalanceResults(shoe, totalBalance, bet);
+	DisplayHandResults(player, dealer, shoe, totalBalance);
+	DisplayBalanceResults(shoe, player, totalBalance);
 }
 
 void BlackjackTable(int table, int& chips, Shoe& shoe) {
-
 	int lastDailyCheck;
+
 	while (true) {
+		Hand player;
+		Hand dealer;
 
 		LoadBlackjackFile(chips, lastDailyCheck);
 		BlackjackTableValues bets;
@@ -205,30 +213,29 @@ void BlackjackTable(int table, int& chips, Shoe& shoe) {
 			minBets = bets.table3;
 		}
 
-		int bet = 0;
 		std::cout << "\nTable " << table << "\n\n";
 		std::cout << "Available balance: $" << chips << "\n";
 		std::cout << "Min bet: $" << minBets << "\n\n";
 		std::cout << "How much would you like to bet (Enter a negative number to leave this table): ";
-		std::cin >> bet;
+		std::cin >> player.bet;
 
-		if (bet < 0) {
+		if (player.bet < 0) {
 			return;
 		}
-		else if (bet < minBets) {
+		else if (player.bet < minBets) {
 			std::cout << "Bet does not meet the minimum bet.\n";
 			std::cin.clear();
 			std::cin.ignore(1000, '\n');
 		}
-		else if (bet > chips) {
+		else if (player.bet > chips) {
 			std::cout << "Bet execeds your balance.\n";
 			std::cin.clear();
 			std::cin.ignore(1000, '\n');
 		}
 		else {
 			std::cin.ignore(1000, '\n');
-			chips -= bet;
-			BlackjackGame(bet, chips, shoe);
+			chips -= player.bet;
+			BlackjackGame(chips, shoe, player, dealer);
 		}
 	}
 }

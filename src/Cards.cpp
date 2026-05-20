@@ -16,7 +16,7 @@ void BlackjackDrawCard(Hand& hand, Shoe& shoe) {
 	shoe.dist = std::discrete_distribution<>(shoe.cardsWeighted, shoe.cardsWeighted + 10);
 }
 
-void playerHit(Hand& player, Hand& dealer, Shoe& shoe) {
+void playerHit(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance) {
 	CalculatePlayerOrDealerTotal(player);
 	CalculatePlayerOrDealerTotal(dealer);
 	
@@ -34,7 +34,18 @@ void playerHit(Hand& player, Hand& dealer, Shoe& shoe) {
 			break;
 		}
 
-		char playerNextChoice = playerMoveCheck();
+		char playerNextChoice;
+
+		while (true) {
+			playerNextChoice = playerMoveCheck(player, totalBalance);
+
+			if (playerNextChoice == 'D') {
+				std::cout << "\nCan only double with a fresh hand.";
+			}
+			else {
+				break;
+			}
+		}
 
 		if (playerNextChoice == 'S') {
 			break;
@@ -60,13 +71,11 @@ void playerStand(Hand& player, Hand& dealer, Shoe& shoe) {
 	}
 }
 
-void playerDouble(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance, int& bet) {
+void playerDouble(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance) {
 	CalculatePlayerOrDealerTotal(player);
 	CalculatePlayerOrDealerTotal(dealer);
 
 	BlackjackDrawCard(player, shoe);
-	totalBalance -= bet;
-	bet *= 2;
 
 	DisplayPlayerOrDealerCards(player, "Player");
 	DisplayPlayerOrDealerCards(dealer, "Dealer");

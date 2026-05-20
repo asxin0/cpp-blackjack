@@ -7,7 +7,7 @@
 #include <vector>
 #include <iomanip>
 
-void DisplayHandResults(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance, int& bet) {
+void DisplayHandResults(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance) {
 	CalculatePlayerOrDealerTotal(player);
 	CalculatePlayerOrDealerTotal(dealer);
 
@@ -16,26 +16,26 @@ void DisplayHandResults(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalanc
 	}
 	else if (player.total == 21 && dealer.total != 21) {
 		std::cout << "\n\nBlackjack!";
-		totalBalance += (bet * 2) + (bet * 0.5);
+		totalBalance += (player.bet * 2) + (player.bet * 0.5);
 	}
 	else if (dealer.total > 21) {
 		std::cout << "\n\nDealer busts!";
-		totalBalance += (bet * 2);
+		totalBalance += (player.bet * 2);
 	}
 	else if (player.total == dealer.total) {
 		std::cout << "\n\nPush!";
-		totalBalance += bet;
+		totalBalance += player.bet;
 	}
 	else if (player.total > dealer.total) {
 		std::cout << "\n\nYou win!";
-		totalBalance += (bet * 2);
+		totalBalance += (player.bet * 2);
 	}
 	else {
 		std::cout << "\n\nYou lose!";
 	}
 }
 
-void DisplayBalanceResults(Shoe& shoe, int& totalBalance, int& bet) {
+void DisplayBalanceResults(Shoe& shoe, Hand& player, int& totalBalance) {
 	std::cout << "\nYour new balance is $" << totalBalance << ".\n";
 	SaveBlackjackFile(totalBalance, CurrentTime());
 

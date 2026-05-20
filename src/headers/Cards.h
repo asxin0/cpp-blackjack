@@ -18,14 +18,16 @@ struct Shoe {
 struct Hand {
 	std::vector<int> cards = {};
 
+	int bet = 0;
+
 	int total = 0;
 	bool isDoubled = false;
 };
 
 void BlackjackDrawCard(Hand& hand, Shoe& shoe);
-void playerHit(Hand& hand, Hand& dealer, Shoe& shoe);
+void playerHit(Hand& hand, Hand& dealer, Shoe& shoe, int& totalBalance);
 void playerStand(Hand& hand, Hand& dealer, Shoe& shoe);
-void playerDouble(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance, int& bet);
+void playerDouble(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance);
 void AceOneOrEleven(Hand& hand);
 void CalculatePlayerOrDealerTotal(Hand& hand);
 void BlackjackAceCheck(int result, Hand& hand);
