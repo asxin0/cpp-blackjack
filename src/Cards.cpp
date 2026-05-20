@@ -4,6 +4,10 @@
 
 #include <iostream>
 
+void revealDealerHiddenCard(Hand& player, Hand& dealer, Shoe& shoe) {
+	
+}
+
 void BlackjackDrawCard(Hand& hand, Shoe& shoe) {
 	int card = shoe.dist(shoe.gen);
 	int result = shoe.cards[card];
@@ -25,8 +29,8 @@ void playerHit(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance) {
 
 		AceOneOrEleven(player);
 
-		DisplayPlayerOrDealerCards(player, "Player");
-		DisplayPlayerOrDealerCards(dealer, "Dealer");
+		DisplayPlayerOrDealerCards(player, "Player", false);
+		DisplayPlayerOrDealerCards(dealer, "Dealer", true);
 
 		CalculatePlayerOrDealerTotal(player);
 
@@ -57,18 +61,23 @@ void playerStand(Hand& player, Hand& dealer, Shoe& shoe) {
 	CalculatePlayerOrDealerTotal(player);
 	CalculatePlayerOrDealerTotal(dealer);
 
+	if (dealer.total >= 17 && dealer.cards.size() == 2) {
+		DisplayPlayerOrDealerCards(player, "Player", false);
+		DisplayPlayerOrDealerCards(dealer, "Dealer", false);
+	}
+
 	while (dealer.total < 17) {
 		BlackjackDrawCard(dealer, shoe);
 
 		AceOneOrEleven(dealer);
 
-		DisplayPlayerOrDealerCards(player, "Player");
-		DisplayPlayerOrDealerCards(dealer, "Dealer");
+		DisplayPlayerOrDealerCards(player, "Player", false);
+		DisplayPlayerOrDealerCards(dealer, "Dealer", false);
 
 		CalculatePlayerOrDealerTotal(dealer);
 
 		std::cout << "\n";
-	}
+	} 
 }
 
 void playerDouble(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance) {
@@ -77,8 +86,10 @@ void playerDouble(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance) {
 
 	BlackjackDrawCard(player, shoe);
 
-	DisplayPlayerOrDealerCards(player, "Player");
-	DisplayPlayerOrDealerCards(dealer, "Dealer");
+	AceOneOrEleven(player);
+
+	DisplayPlayerOrDealerCards(player, "Player", false);
+	DisplayPlayerOrDealerCards(dealer, "Dealer", false);
 }
 
 void AceOneOrEleven(Hand& hand) {

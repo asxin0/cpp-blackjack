@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <cctype>
 
 void DisplayHandResults(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance) {
 	CalculatePlayerOrDealerTotal(player);
@@ -14,7 +15,7 @@ void DisplayHandResults(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalanc
 	if (player.total > 21) {
 		std::cout << "\n\nYou bust!";
 	}
-	else if (player.total == 21 && dealer.total != 21) {
+	else if (player.total == 21 && dealer.total != 21 && player.cards.size() == 2) {
 		std::cout << "\n\nBlackjack!";
 		totalBalance += (player.bet * 2) + (player.bet * 0.5);
 	}
@@ -39,36 +40,43 @@ void DisplayBalanceResults(Shoe& shoe, Hand& player, int& totalBalance) {
 	std::cout << "\nYour new balance is $" << totalBalance << ".\n";
 	SaveBlackjackFile(totalBalance, CurrentTime());
 
+	for (int i : shoe.cardsWeighted) {
+		std::cout << i << " ";
+	}
+	std::cout << shoe.cardsDrawn;
+
 	if (shoe.cardsDrawn >= 117) {
 		std::cout << "\nYou've hit the cut card, reshuffling shoe.";
 		BlackjackMenu();
 	}
 }
 
-void DisplayPlayerOrDealerCards(Hand& hand, std::string name) {
+void DisplayPlayerOrDealerCards(Hand& hand, std::string name, bool hideSecond) {
 	CalculatePlayerOrDealerTotal(hand);
+
+	if (hideSecond) {
+		hand.total -= hand.cards[1];
+	}
 
 	std::cout << "\n| Total: " << std::setw(2) << hand.total << " | ";
 	std::cout << name << " cards: ";
-	int x = 1;
 
-	for (int i : hand.cards) {
-		if (i == 11) {
-			if (x == hand.cards.size()) {
-				std::cout << i << " (Ace)";
-			}
-			else {
-				std::cout << i << " (Ace), ";
-			}
+	hand.total += hand.cards[1];
+
+	for (int i = 0; i < hand.cards.size(); i++) {
+		if (hideSecond && i == 1) {
+			std::cout << "?";
 		}
 		else {
-			if (x == hand.cards.size()) {
-				std::cout << i;
-			}
-			else {
-				std::cout << i << ", ";
+			std::cout << hand.cards[i];
+
+			if (hand.cards[i] == 11 || hand.cards[i] == 1) {
+				std::cout << " (Ace)";
 			}
 		}
-		x++;
+
+		if (i < hand.cards.size() - 1) {
+			std::cout << ", ";
+		}
 	}
 }

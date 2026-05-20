@@ -33,7 +33,9 @@ char playerMoveCheck(Hand& player, int& totalBalance) {
 				std::cin.clear();
 				std::cin.ignore(1000, '\n');
 			}
-			break;
+			else {
+				break;
+			}
 		}
 	}
 	return std::toupper(playerMove);
@@ -53,8 +55,8 @@ void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& d
 		std::cout << "\nHand " << i << ".\n";
 		BlackjackDrawCard(player, shoe);
 
-		DisplayPlayerOrDealerCards(player, "player");
-		DisplayPlayerOrDealerCards(dealer, "dealer");
+		DisplayPlayerOrDealerCards(player, "player", false);
+		DisplayPlayerOrDealerCards(dealer, "dealer", true);
 
 		char playerMove = playerMoveCheck(player, totalBalance);
 
@@ -93,25 +95,16 @@ void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& d
 void BlackjackGame(int& totalBalance, Shoe& shoe, Hand& player, Hand& dealer) {
 	bool runOnce = true;
 
-	int i = 1;
-
-	while (i <= 3) {
-		if (i == 2) {
-			BlackjackDrawCard(dealer, shoe);
-		}
-		else if (i == 1 || i == 3) {
-			BlackjackDrawCard(player, shoe);
-		}
-		else {
-		}
-		i++;
+	for (int i = 1; i < 3; i++) {
+		BlackjackDrawCard(player, shoe);
+		BlackjackDrawCard(dealer, shoe);
 	}
 
 	CalculatePlayerOrDealerTotal(player);
 	CalculatePlayerOrDealerTotal(dealer);
 
-	DisplayPlayerOrDealerCards(player, "Player");
-	DisplayPlayerOrDealerCards(dealer, "Dealer");
+	DisplayPlayerOrDealerCards(player, "Player", false);
+	DisplayPlayerOrDealerCards(dealer, "Dealer", true);
 
 	if (player.cards[0] == player.cards[1]) {
 		char splitChoice;
@@ -139,8 +132,8 @@ void BlackjackGame(int& totalBalance, Shoe& shoe, Hand& player, Hand& dealer) {
 
 				return;
 			case 'n':
-				DisplayPlayerOrDealerCards(player, "Player");
-				DisplayPlayerOrDealerCards(dealer, "Dealer");
+				DisplayPlayerOrDealerCards(player, "Player", false);
+				DisplayPlayerOrDealerCards(dealer, "Dealer", true);
 
 				splitErrorCheck = false;
 
