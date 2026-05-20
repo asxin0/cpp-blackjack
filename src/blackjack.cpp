@@ -12,6 +12,8 @@
 #include <fstream>
 #include <ctime>
 #include <iomanip>
+#include <chrono>
+#include <thread>
 
 char playerMoveCheck(Hand& player, int& totalBalance) {
 	char playerMove;
@@ -42,7 +44,6 @@ char playerMoveCheck(Hand& player, int& totalBalance) {
 }
 
 void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& dealer, int& totalBalance) {
-	dealer.cards = { dealerCard };
 	std::vector<Hand> playerHands = {};
 	int baseBet = player.bet;
 
@@ -64,6 +65,8 @@ void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& d
 			playerHit(player, dealer, shoe, totalBalance);
 		}
 		else if (playerMove == 'D') {
+			std::cout << "\n- " << player.bet << " chips.\n";
+
 			playerDouble(player, dealer, shoe, totalBalance);
 			player.isDoubled = true;
 
@@ -77,7 +80,6 @@ void SplitCards(int splitCard, int dealerCard, Shoe& shoe, Hand& player, Hand& d
 		playerHands.push_back(player);
 	}
 
-	std::cout << "\nDealer Draws:\n";
 	playerStand(player, dealer, shoe);
 
 	std::cout << "\n";
@@ -114,7 +116,7 @@ void BlackjackGame(int& totalBalance, Shoe& shoe, Hand& player, Hand& dealer) {
 			std::cout << "\n\nWould you like to split your " << player.cards[0] << "s? (y / n): ";
 			std::cin >> splitChoice;
 
-			switch (splitChoice) {
+			switch (std::tolower(splitChoice)) {
 			case 'y':
 				if (totalBalance < player.bet) {
 					std::cout << "You don't have enough chips to split.";
@@ -124,6 +126,7 @@ void BlackjackGame(int& totalBalance, Shoe& shoe, Hand& player, Hand& dealer) {
 				}
 
 				totalBalance -= player.bet;
+				std::cout << "\n- " << player.bet << " chips.\n";
 				SplitCards(player.cards[0], dealer.cards[0], shoe, player, dealer, totalBalance);
 				splitErrorCheck = false;
 
@@ -159,14 +162,14 @@ void BlackjackGame(int& totalBalance, Shoe& shoe, Hand& player, Hand& dealer) {
 		runOnce = false;
 	}
 
-	char playerMove = playerMoveCheck(player, totalBalance);
-
 	if (runOnce) {
+		char playerMove = playerMoveCheck(player, totalBalance);
+
 		if (playerMove == 'H') {
 			playerHit(player, dealer, shoe, totalBalance);
 		}
 		else if (playerMove == 'D' && totalBalance >= player.bet) {
-			std::cout << "\n- " << player.bet << " chips.\n\n";
+			std::cout << "\n\n- " << player.bet << " chips.\n";
 			playerDouble(player, dealer, shoe, totalBalance);
 			AceOneOrEleven(player);
 
@@ -175,7 +178,6 @@ void BlackjackGame(int& totalBalance, Shoe& shoe, Hand& player, Hand& dealer) {
 		}
 
 		if (player.total <= 21) {
-			std::cout << "\nDealer Draws...\n";
 			playerStand(player, dealer, shoe);
 		}
 	}
@@ -257,14 +259,25 @@ void BlackjackMenu() {
 			file.close();
 		}
 
-		std::cout << "\n\nWelcome to Blackjack - 3 deck shoe\n\n";
+		std::cout << "\n\n+------------------------------------------+\n";
+		std::cout << "|          BLACKJACK - 3 DECK SHOE         |\n";
+		std::cout << "+------------------------------------------+\n\n";
 		DailyBlackjackReward(chips, lastDailyCheck);
 		LoadBlackjackFile(chips, lastDailyCheck);
+
+		std::cout << "+------------------------------------------+\n";
+		std::cout << "| Your Chips: $" << std::setw(27) << chips << " |\n";
+		std::cout << "+--------+---------------------------------+\n";
+		std::cout << "| Table  | Entry Requirement               |\n";
+		std::cout << "+--------+---------------------------------+\n";
+
 		for (int i = 1; i <= blackjack.maxTables; i++) {
-			std::cout << "Table " << i << " - " << requirements[i - 1] << " chips required for entry.\n";
+			std::cout << "| " << std::setw(3) << i << "    | $"
+				<< std::setw(30) << requirements[i - 1] << " |\n";
 		}
-		std::cout << "Your Chips: " << chips << "\n";
-		std::cout << "\nWhich table would you like to join? (Please enter a table #): ";
+
+		std::cout << "+--------+---------------------------------+\n\n";
+		std::cout << "Choose a table number: ";
 		std::cin >> table;
 
 		switch (table) {

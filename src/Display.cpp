@@ -40,13 +40,8 @@ void DisplayBalanceResults(Shoe& shoe, Hand& player, int& totalBalance) {
 	std::cout << "\nYour new balance is $" << totalBalance << ".\n";
 	SaveBlackjackFile(totalBalance, CurrentTime());
 
-	for (int i : shoe.cardsWeighted) {
-		std::cout << i << " ";
-	}
-	std::cout << shoe.cardsDrawn;
-
 	if (shoe.cardsDrawn >= 117) {
-		std::cout << "\nYou've hit the cut card, reshuffling shoe.";
+		std::cout << "\n\nYou've hit the cut card, reshuffling shoe.";
 		BlackjackMenu();
 	}
 }
@@ -60,8 +55,10 @@ void DisplayPlayerOrDealerCards(Hand& hand, std::string name, bool hideSecond) {
 
 	std::cout << "\n| Total: " << std::setw(2) << hand.total << " | ";
 	std::cout << name << " cards: ";
-
-	hand.total += hand.cards[1];
+	
+	if (hideSecond) {
+		hand.total += hand.cards[1];
+	}
 
 	for (int i = 0; i < hand.cards.size(); i++) {
 		if (hideSecond && i == 1) {

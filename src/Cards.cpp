@@ -3,12 +3,13 @@
 #include "headers/Display.h"
 
 #include <iostream>
-
-void revealDealerHiddenCard(Hand& player, Hand& dealer, Shoe& shoe) {
-	
-}
+#include <chrono>
+#include <thread>
 
 void BlackjackDrawCard(Hand& hand, Shoe& shoe) {
+	std::cout << "\nDrawing card...\n";
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+
 	int card = shoe.dist(shoe.gen);
 	int result = shoe.cards[card];
 
@@ -62,11 +63,29 @@ void playerStand(Hand& player, Hand& dealer, Shoe& shoe) {
 	CalculatePlayerOrDealerTotal(dealer);
 
 	if (dealer.total >= 17 && dealer.cards.size() == 2) {
+		std::cout << "\nDealer Reveals...\n";
+		std::this_thread::sleep_for(std::chrono::seconds(2));
+
 		DisplayPlayerOrDealerCards(player, "Player", false);
 		DisplayPlayerOrDealerCards(dealer, "Dealer", false);
+
+		std::cout << "\n";
 	}
 
+	bool runOnce = true;
+
 	while (dealer.total < 17) {
+		if (runOnce) {
+			std::cout << "\nDealer Reveals...\n";
+			std::this_thread::sleep_for(std::chrono::seconds(2));
+
+			DisplayPlayerOrDealerCards(player, "Player", false);
+			DisplayPlayerOrDealerCards(dealer, "Dealer", false);
+
+			std::cout << "\n";
+			runOnce = false;
+		}
+
 		BlackjackDrawCard(dealer, shoe);
 
 		AceOneOrEleven(dealer);
@@ -89,7 +108,7 @@ void playerDouble(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalance) {
 	AceOneOrEleven(player);
 
 	DisplayPlayerOrDealerCards(player, "Player", false);
-	DisplayPlayerOrDealerCards(dealer, "Dealer", false);
+	DisplayPlayerOrDealerCards(dealer, "Dealer", true);
 }
 
 void AceOneOrEleven(Hand& hand) {
