@@ -15,6 +15,17 @@
 #include <chrono>
 #include <thread>
 
+bool cutCardCheck(Shoe& shoe) {
+	if (shoe.cardsDrawn >= 10) {
+		std::cout << "\n\nYou've hit the cut card, reshuffling shoe.";
+
+		std::this_thread::sleep_for(std::chrono::seconds(2));
+
+		return true;
+	}
+	return false;
+}
+
 char playerMoveCheck(Hand& player, int& totalBalance) {
 	char playerMove;
 
@@ -187,9 +198,9 @@ void BlackjackGame(int& totalBalance, Shoe& shoe, Hand& player, Hand& dealer) {
 }
 
 void BlackjackTable(int table, int& chips, Shoe& shoe) {
-	int lastDailyCheck;
-
 	while (true) {
+		int lastDailyCheck;
+
 		Hand player;
 		Hand dealer;
 
@@ -206,6 +217,10 @@ void BlackjackTable(int table, int& chips, Shoe& shoe) {
 			break;
 		case 3:
 			minBets = bets.table3;
+		}
+
+		if (cutCardCheck(shoe) == true) {
+			return;
 		}
 
 		std::cout << "\nTable " << table << "\n\n";

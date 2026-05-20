@@ -39,11 +39,6 @@ void DisplayHandResults(Hand& player, Hand& dealer, Shoe& shoe, int& totalBalanc
 void DisplayBalanceResults(Shoe& shoe, Hand& player, int& totalBalance) {
 	std::cout << "\nYour new balance is $" << totalBalance << ".\n";
 	SaveBlackjackFile(totalBalance, CurrentTime());
-
-	if (shoe.cardsDrawn >= 117) {
-		std::cout << "\n\nYou've hit the cut card, reshuffling shoe.";
-		BlackjackMenu();
-	}
 }
 
 void DisplayPlayerOrDealerCards(Hand& hand, std::string name, bool hideSecond) {
